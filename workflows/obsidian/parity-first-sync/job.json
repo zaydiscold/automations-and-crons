@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "id": "obsidian.parity-first-sync",
+  "title": "Obsidian parity-first sync",
+  "domain": "obsidian",
+  "enabled": false,
+  "schedule": {
+    "cron": "30 3 * * *",
+    "timezone": "America/Los_Angeles"
+  },
+  "runtime": {
+    "kind": "script",
+    "uses_llm": false
+  },
+  "inputs": [
+    "two or more independently authored vault trees"
+  ],
+  "outputs": [
+    "parity/backup/sync receipt"
+  ],
+  "risk": {
+    "level": "filesystem-write",
+    "confirmation": "must remain paused until read-only manifests and immutable backups are verified"
+  },
+  "verification": [
+    "filename/size/hash manifests collected from every tree",
+    "unique/divergent paths reviewed",
+    "immutable backups created",
+    "merge is additive before any deletion",
+    "only one live sync transport owns a tree"
+  ],
+  "logging": {
+    "receipt": "one bounded per-run receipt",
+    "retention": "operator-defined local retention",
+    "business_verification_required": true
+  },
+  "failure_policy": {
+    "deliver_every_run": true,
+    "mode": "paused-fail-closed",
+    "never_infer_success": true
+  },
+  "secrets_policy": "vault contents and paths never enter public logs"
+}

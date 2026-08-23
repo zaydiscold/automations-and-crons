@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "robinhood.premarket-brief",
+  "title": "Robinhood premarket brief",
+  "domain": "robinhood",
+  "enabled": true,
+  "schedule": {
+    "cron": "0 6 * * 1-5",
+    "timezone": "America/Los_Angeles"
+  },
+  "runtime": {
+    "kind": "agent",
+    "uses_llm": true
+  },
+  "inputs": [
+    "live portfolio/account/position/option reads",
+    "current market context"
+  ],
+  "outputs": [
+    "bounded current-session brief",
+    "verified snapshot receipt"
+  ],
+  "risk": {
+    "level": "read-only",
+    "confirmation": "no trade or mutation is allowed"
+  },
+  "verification": [
+    "all owned accounts reconcile",
+    "dollar P&L is used instead of size-blind ranking",
+    "snapshot artifact parses",
+    "title date and runtime footer match contract"
+  ],
+  "logging": {
+    "receipt": "one bounded per-run receipt",
+    "retention": "operator-defined local retention",
+    "business_verification_required": true
+  },
+  "failure_policy": {
+    "deliver_every_run": true,
+    "mode": "fail-loud",
+    "never_infer_success": true
+  },
+  "secrets_policy": "financial details remain in private receipts; templates contain no values"
+}

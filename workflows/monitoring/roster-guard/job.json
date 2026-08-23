@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "monitoring.roster-guard",
+  "title": "Cron roster semantic guard",
+  "domain": "monitoring",
+  "enabled": true,
+  "schedule": {
+    "cron": "*/5 * * * *",
+    "timezone": "America/Los_Angeles"
+  },
+  "runtime": {
+    "kind": "script",
+    "uses_llm": false
+  },
+  "inputs": [
+    "sanitized scheduler metadata",
+    "latest bounded output receipts"
+  ],
+  "outputs": [
+    "healthy/broken transition alert",
+    "monitor heartbeat"
+  ],
+  "risk": {
+    "level": "monitoring-write",
+    "confirmation": "may update local monitor state and send transition alerts only"
+  },
+  "verification": [
+    "required names/schedules/runtimes/delivery contracts match",
+    "intentional pauses are explicit",
+    "weekend schedules do not false-alarm",
+    "latest outputs satisfy format contracts"
+  ],
+  "logging": {
+    "receipt": "one bounded per-run receipt",
+    "retention": "operator-defined local retention",
+    "business_verification_required": true
+  },
+  "failure_policy": {
+    "deliver_every_run": false,
+    "mode": "transition-alert",
+    "never_infer_success": true
+  },
+  "secrets_policy": "monitor tokens and delivery destinations remain local"
+}

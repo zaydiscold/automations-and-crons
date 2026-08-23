@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "id": "goodreads.daily-reading-annotations",
+  "title": "Goodreads daily reading + annotations",
+  "domain": "goodreads",
+  "enabled": true,
+  "schedule": {
+    "cron": "0 3 * * *",
+    "timezone": "America/Los_Angeles"
+  },
+  "runtime": {
+    "kind": "script",
+    "uses_llm": false
+  },
+  "inputs": [
+    "authenticated currently-reading shelf",
+    "annotated-book detail metadata",
+    "authenticated recent-comments metadata",
+    "prior hashed/count state"
+  ],
+  "outputs": [
+    "every current title",
+    "new highlight/note counts",
+    "publicization receipt",
+    "comments count/delta without bodies"
+  ],
+  "risk": {
+    "level": "account-write",
+    "confirmation": "standing approval limited to making newly detected private annotations visible"
+  },
+  "verification": [
+    "shelf parsed count equals declared count and every title is non-null",
+    "every annotated book detail is inspected",
+    "post-write visible count equals annotation count",
+    "comment output contains no body fields",
+    "state updates are atomic"
+  ],
+  "logging": {
+    "receipt": "one bounded per-run receipt",
+    "retention": "operator-defined local retention",
+    "business_verification_required": true
+  },
+  "failure_policy": {
+    "deliver_every_run": true,
+    "mode": "partial-fail-loud",
+    "never_infer_success": true
+  },
+  "secrets_policy": "session cookies and CSRF remain local; public output is counts/titles only"
+}

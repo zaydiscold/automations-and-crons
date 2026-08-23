@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "id": "robinhood.postmarket-summary",
+  "title": "Robinhood postmarket summary",
+  "domain": "robinhood",
+  "enabled": true,
+  "schedule": {
+    "cron": "0 17 * * 1-5",
+    "timezone": "America/Los_Angeles"
+  },
+  "runtime": {
+    "kind": "agent",
+    "uses_llm": true
+  },
+  "inputs": [
+    "live close/after-hours account data",
+    "current market context"
+  ],
+  "outputs": [
+    "bounded close brief",
+    "verified postmarket snapshot receipt"
+  ],
+  "risk": {
+    "level": "read-only",
+    "confirmation": "no trade or mutation is allowed"
+  },
+  "verification": [
+    "regular and after-hours windows are labeled separately",
+    "all accounts reconcile",
+    "snapshot artifact parses",
+    "tomorrow section uses verified catalysts only"
+  ],
+  "logging": {
+    "receipt": "one bounded per-run receipt",
+    "retention": "operator-defined local retention",
+    "business_verification_required": true
+  },
+  "failure_policy": {
+    "deliver_every_run": true,
+    "mode": "fail-loud",
+    "never_infer_success": true
+  },
+  "secrets_policy": "financial details remain private"
+}
