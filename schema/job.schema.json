@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Public Hermes cron playbook",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "domain",
+    "enabled",
+    "schedule",
+    "runtime",
+    "inputs",
+    "outputs",
+    "risk",
+    "verification",
+    "logging",
+    "failure_policy",
+    "secrets_policy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9.-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "domain": {
+      "type": "string"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "schedule": {
+      "type": "object",
+      "required": [
+        "cron",
+        "timezone"
+      ]
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "kind",
+        "uses_llm"
+      ]
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1
+    },
+    "outputs": {
+      "type": "array",
+      "minItems": 1
+    },
+    "risk": {
+      "type": "object",
+      "required": [
+        "level",
+        "confirmation"
+      ]
+    },
+    "verification": {
+      "type": "array",
+      "minItems": 1
+    },
+    "logging": {
+      "type": "object",
+      "required": [
+        "receipt",
+        "retention",
+        "business_verification_required"
+      ]
+    },
+    "failure_policy": {
+      "type": "object",
+      "required": [
+        "deliver_every_run",
+        "mode",
+        "never_infer_success"
+      ]
+    },
+    "secrets_policy": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}

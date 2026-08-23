@@ -1,0 +1,8 @@
+workflow,domain,cadence,runtime,risk,delivery,receipt,verification,failure
+goodreads.daily-reading-annotations,goodreads,daily,script,account-write,every run,bounded reading/annotation/comments receipt,three-surface semantic readback,partial fail loud
+robinhood.token-refresh,robinhood,every few days,agent,auth-write,every run,redacted auth receipt,authenticated account read,fail loud
+robinhood.premarket-brief,robinhood,weekdays,agent,read-only,every run,bounded brief + snapshot receipt,all-account reconciliation,fail loud
+robinhood.midday-snapshot,robinhood,weekdays,agent,read-only,every run,bounded snapshot receipt,current-session dollar reconciliation,fail loud
+robinhood.postmarket-summary,robinhood,weekdays,agent,read-only,every run,bounded close receipt,regular/AH reconciliation,fail loud
+obsidian.parity-first-sync,obsidian,paused,script,filesystem-write,every run when enabled,backup/parity receipt,hash manifests + immutable backups,paused fail closed
+monitoring.roster-guard,monitoring,every five minutes,script,monitoring-write,transitions,health-state receipt,semantic roster + output contracts,transition alert

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "id": "robinhood.token-refresh",
+  "title": "Robinhood token refresh",
+  "domain": "robinhood",
+  "enabled": true,
+  "schedule": {
+    "cron": "0 4 */3 * *",
+    "timezone": "America/Los_Angeles"
+  },
+  "runtime": {
+    "kind": "agent",
+    "uses_llm": true
+  },
+  "inputs": [
+    "freshest locally authorized browser-session candidate"
+  ],
+  "outputs": [
+    "redacted auth-health receipt"
+  ],
+  "risk": {
+    "level": "auth-write",
+    "confirmation": "standing approval limited to refreshing the existing local session"
+  },
+  "verification": [
+    "authenticated account-list read succeeds",
+    "expected account count is not truncated",
+    "no token appears in output or argv"
+  ],
+  "logging": {
+    "receipt": "one bounded per-run receipt",
+    "retention": "operator-defined local retention",
+    "business_verification_required": true
+  },
+  "failure_policy": {
+    "deliver_every_run": true,
+    "mode": "fail-loud",
+    "never_infer_success": true
+  },
+  "secrets_policy": "tokens stay in protected local files and process environment"
+}
