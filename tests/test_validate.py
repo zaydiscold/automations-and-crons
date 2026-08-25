@@ -51,6 +51,21 @@ class ValidationTests(unittest.TestCase):
         self.assertNotIn("ver" + "ifiable", readme)
         self.assertFalse((ROOT / "LICENSE").exists())
 
+    def test_empty_model_and_runtime_values_are_rejected(self):
+        source = ROOT / "workflows/robinhood/premarket-brief/job.json"
+        data = json.loads(source.read_text(encoding="utf-8"))
+        data["runtime"]["scheduler"] = ""
+        data["runtime"]["model"]["fallbacks"][0]["provider"] = ""
+        data["verification"] = "looks nonempty but is not a list"
+        data["copying"]["requires"] = "also not a list"
+        data["limitations"] = "not a list either"
+        issues = VALIDATOR.validate_spec(source, data)
+        self.assertTrue(any("runtime.scheduler" in issue for issue in issues))
+        self.assertTrue(any("every fallback" in issue for issue in issues))
+        self.assertTrue(any("verification must be a nonempty list" in issue for issue in issues))
+        self.assertTrue(any("copying.requires" in issue for issue in issues))
+        self.assertTrue(any("limitations must contain" in issue for issue in issues))
+
 
 if __name__ == "__main__":
     unittest.main()

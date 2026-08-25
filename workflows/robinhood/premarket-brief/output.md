@@ -39,3 +39,5 @@ runtime: <actual provider> · <actual model> · reasoning=<actual effort>
 ````
 
 Maximum 3,600 characters / 52 nonblank lines before the runtime footer. Nothing follows runtime.
+
+All rendered sections are required. If there are no critical alerts, print `No material alert.` under that heading instead of inventing one. If no material option/expiration item exists, print `- No material option or expiration exception.` The drivers table may contain 1–5 real rows; when there are zero material drivers, replace the table with `No material dollar driver.` Never emit a placeholder row.
