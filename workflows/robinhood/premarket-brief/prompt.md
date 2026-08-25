@@ -1,3 +1,3 @@
-# Behavior contract
+# What the agent is told
 
-Collect a current-session, all-account snapshot through the operator's custom read-only brokerage client. Report absolute-dollar drivers, critical option/expiration facts, and one verified snapshot receipt. Never place, cancel, or modify an order.
+Pull a current-session, all-account snapshot through the custom read-only brokerage client. Rank drivers in absolute dollars, keep options/expiration facts bounded, write the private snapshot, then follow `output.md` exactly. Never place, cancel, or modify an order.

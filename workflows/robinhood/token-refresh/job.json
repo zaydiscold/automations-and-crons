@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "robinhood.token-refresh",
   "title": "Robinhood token refresh",
   "domain": "robinhood",
@@ -9,8 +9,39 @@
     "timezone": "America/Los_Angeles"
   },
   "runtime": {
+    "scheduler": "Hermes Agent cron",
+    "execution_mode": "agent",
     "kind": "agent",
-    "uses_llm": true
+    "uses_llm": true,
+    "model_attached": true,
+    "model": {
+      "provider": "openai-codex",
+      "name": "gpt-5.6-luna",
+      "reasoning": "max",
+      "fallback_policy": "inherits the scheduler-global chain",
+      "fallbacks": [
+        {
+          "provider": "xai-oauth",
+          "model": "grok-4.6"
+        },
+        {
+          "provider": "openrouter",
+          "model": "deepseek/deepseek-v4-flash"
+        },
+        {
+          "provider": "openrouter",
+          "model": "stealth/ox-alpha"
+        },
+        {
+          "provider": "openrouter",
+          "model": "openrouter/free"
+        }
+      ]
+    },
+    "portable_to": [
+      "Hermes Agent cron",
+      "another agent runner after rewriting the tool and prompt wiring"
+    ]
   },
   "inputs": [
     "freshest locally authorized browser-session candidate"
@@ -37,5 +68,25 @@
     "mode": "fail-loud",
     "never_infer_success": true
   },
-  "secrets_policy": "tokens stay in protected local files and process environment"
+  "secrets_policy": "tokens stay in protected local files and process environment",
+  "output_format": {
+    "delivery": "Telegram Markdown",
+    "template": "output.md",
+    "exact_contract": true,
+    "always_reports": true
+  },
+  "limitations": [
+    "This depends on a custom Robinhood client and an already-authorized browser session; the official trading MCP is not a substitute.",
+    "A reachable token file is not proof of valid auth; the job needs a successful authenticated account read.",
+    "The machine-to-machine browser and filesystem paths are intentionally not included."
+  ],
+  "copying": {
+    "ready_to_run": false,
+    "requires": [
+      "a custom read-capable Robinhood client",
+      "an authorized browser-session source",
+      "protected secret storage",
+      "a cross-machine transport if auth is harvested elsewhere"
+    ]
+  }
 }

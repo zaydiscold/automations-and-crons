@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate public cron contracts and reject likely private runtime material."""
+"""Validate automation/cron contracts and reject likely private runtime material."""
 from __future__ import annotations
 
 import argparse
@@ -18,11 +18,14 @@ REQUIRED = {
     "runtime",
     "inputs",
     "outputs",
+    "output_format",
     "risk",
     "verification",
     "logging",
     "failure_policy",
     "secrets_policy",
+    "limitations",
+    "copying",
 }
 RISKY = {"account-write", "auth-write", "filesystem-write", "monitoring-write"}
 FORBIDDEN = {
@@ -47,6 +50,9 @@ def validate_spec(path: Path, data: dict) -> list[str]:
     if missing:
         issues.append(f"{path}: missing {missing}")
 
+    if data.get("schema_version") != 2:
+        issues.append(f"{path}: schema_version must be 2")
+
     cron = (data.get("schedule") or {}).get("cron", "")
     if len(cron.split()) != 5:
         issues.append(f"{path}: cron must have five fields")
@@ -54,6 +60,39 @@ def validate_spec(path: Path, data: dict) -> list[str]:
         issues.append(f"{path}: timezone must be explicit")
     if not data.get("verification"):
         issues.append(f"{path}: verification is empty")
+
+    runtime = data.get("runtime") or {}
+    uses_llm = runtime.get("uses_llm")
+    attached = runtime.get("model_attached")
+    model = runtime.get("model")
+    if uses_llm is True:
+        if attached is not True or not isinstance(model, dict):
+            issues.append(f"{path}: model-backed runtime lacks attached model metadata")
+        else:
+            required_model = {"provider", "name", "reasoning", "fallback_policy", "fallbacks"}
+            absent = sorted(required_model - set(model))
+            if absent:
+                issues.append(f"{path}: model metadata missing {absent}")
+            if not model.get("fallbacks"):
+                issues.append(f"{path}: model-backed runtime lacks fallbacks")
+    elif uses_llm is False:
+        if attached is not False or model is not None:
+            issues.append(f"{path}: no-agent runtime must declare model_attached=false and model=null")
+    else:
+        issues.append(f"{path}: runtime.uses_llm must be boolean")
+
+    output_format = data.get("output_format") or {}
+    template = output_format.get("template")
+    if not template or not (path.parent / template).is_file():
+        issues.append(f"{path}: output template is missing")
+    if output_format.get("exact_contract") is not True:
+        issues.append(f"{path}: output format must declare exact_contract=true")
+
+    copying = data.get("copying") or {}
+    if copying.get("ready_to_run") is not False or not copying.get("requires"):
+        issues.append(f"{path}: copying limitations must say ready_to_run=false and list requirements")
+    if not data.get("limitations"):
+        issues.append(f"{path}: limitations are empty")
 
     risk = data.get("risk") or {}
     if risk.get("level") in RISKY and not risk.get("confirmation"):
@@ -88,7 +127,7 @@ def validate(root: Path) -> list[str]:
             rows = list(csv.DictReader(handle))
     else:
         rows = []
-    if {row.get("workflow") for row in rows} != ids:
+    if {row.get("automation") for row in rows} != ids:
         issues.append("matrix.csv workflow set does not match specs")
 
     for path in root.rglob("*"):

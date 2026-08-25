@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "obsidian.parity-first-sync",
   "title": "Obsidian parity-first sync",
   "domain": "obsidian",
@@ -9,8 +9,16 @@
     "timezone": "America/Los_Angeles"
   },
   "runtime": {
+    "scheduler": "Hermes Agent cron (optional wrapper)",
+    "execution_mode": "script/no-agent",
     "kind": "script",
-    "uses_llm": false
+    "uses_llm": false,
+    "model_attached": false,
+    "model": null,
+    "portable_to": [
+      "Hermes Agent cron in no-agent mode",
+      "Windows Task Scheduler after adapting local paths"
+    ]
   },
   "inputs": [
     "two or more independently authored vault trees"
@@ -39,5 +47,25 @@
     "mode": "paused-fail-closed",
     "never_infer_success": true
   },
-  "secrets_policy": "vault contents and paths never enter public logs"
+  "secrets_policy": "vault contents and paths never enter public logs",
+  "output_format": {
+    "delivery": "Telegram Markdown",
+    "template": "output.md",
+    "exact_contract": true,
+    "always_reports": true
+  },
+  "limitations": [
+    "This job is paused because two independently edited trees have not been reconciled yet.",
+    "A sync tool is not a merge proof; enabling this blindly can propagate deletions or overwrite unique notes.",
+    "The actual vault paths, backup destinations, and private note contents are not included."
+  ],
+  "copying": {
+    "ready_to_run": false,
+    "requires": [
+      "read-only manifests for every tree",
+      "immutable backups",
+      "an approved merge plan",
+      "exact local paths"
+    ]
+  }
 }
