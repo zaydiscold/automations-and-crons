@@ -66,7 +66,3 @@ matrix.csv
 python scripts/validate.py
 python -m unittest discover -s tests -v
 ```
-
-## Reuse
-
-There is no open-source license attached to this repository. The code and writing remain all rights reserved. Reading it or borrowing the general ideas is fine; do not assume permission to redistribute substantial copies of the repository.
