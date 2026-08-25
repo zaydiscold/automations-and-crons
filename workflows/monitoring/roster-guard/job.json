@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "monitoring.roster-guard",
   "title": "Cron roster semantic guard",
   "domain": "monitoring",
@@ -9,11 +9,19 @@
     "timezone": "America/Los_Angeles"
   },
   "runtime": {
+    "scheduler": "Hermes Agent cron (optional wrapper)",
+    "execution_mode": "script/no-agent",
     "kind": "script",
-    "uses_llm": false
+    "uses_llm": false,
+    "model_attached": false,
+    "model": null,
+    "portable_to": [
+      "Hermes Agent cron in no-agent mode",
+      "another scheduler that can inspect the Hermes job store"
+    ]
   },
   "inputs": [
-    "sanitized scheduler metadata",
+    "scheduler metadata with private values removed",
     "latest bounded output receipts"
   ],
   "outputs": [
@@ -40,5 +48,25 @@
     "mode": "transition-alert",
     "never_infer_success": true
   },
-  "secrets_policy": "monitor tokens and delivery destinations remain local"
+  "secrets_policy": "monitor tokens and delivery destinations remain local",
+  "output_format": {
+    "delivery": "plain-text transition alert + private heartbeat",
+    "template": "output.md",
+    "exact_contract": true,
+    "always_reports": false
+  },
+  "limitations": [
+    "This watches one specific job roster; copied names, schedules, and required jobs need to be replaced.",
+    "Scheduler status ok is not proof that a job produced a correct business result.",
+    "Transition-only delivery can hide a dead monitor unless a separate heartbeat watches the watcher."
+  ],
+  "copying": {
+    "ready_to_run": false,
+    "requires": [
+      "your required roster contract",
+      "access to scheduler metadata and receipts",
+      "a private state file",
+      "a separate heartbeat monitor"
+    ]
+  }
 }

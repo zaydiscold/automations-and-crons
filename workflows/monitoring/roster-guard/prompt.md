@@ -1,3 +1,3 @@
-# Behavior contract
+# What this job checks
 
-Validate semantics, not existence: schedule, runtime, enabled/paused intent, delivery contract, verification markers, and fresh output receipts. Alert only on healthy/broken transitions; publish heartbeats to the private monitor plane.
+Validate schedule, runtime, enabled/paused intent, delivery, verification markers, and recent output receipts—not just whether a job exists. Alert on healthy/broken transitions and publish a heartbeat to the private monitor plane. No model is attached.

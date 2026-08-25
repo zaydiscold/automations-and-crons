@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "robinhood.midday-snapshot",
   "title": "Robinhood midday snapshot",
   "domain": "robinhood",
@@ -9,8 +9,39 @@
     "timezone": "America/Los_Angeles"
   },
   "runtime": {
+    "scheduler": "Hermes Agent cron",
+    "execution_mode": "agent",
     "kind": "agent",
-    "uses_llm": true
+    "uses_llm": true,
+    "model_attached": true,
+    "model": {
+      "provider": "openai-codex",
+      "name": "gpt-5.6-luna",
+      "reasoning": "max",
+      "fallback_policy": "inherits the scheduler-global chain",
+      "fallbacks": [
+        {
+          "provider": "xai-oauth",
+          "model": "grok-4.6"
+        },
+        {
+          "provider": "openrouter",
+          "model": "deepseek/deepseek-v4-flash"
+        },
+        {
+          "provider": "openrouter",
+          "model": "stealth/ox-alpha"
+        },
+        {
+          "provider": "openrouter",
+          "model": "openrouter/free"
+        }
+      ]
+    },
+    "portable_to": [
+      "Hermes Agent cron",
+      "another agent runner after rewriting the tool and prompt wiring"
+    ]
   },
   "inputs": [
     "live portfolio/account/position/option reads",
@@ -40,5 +71,25 @@
     "mode": "fail-loud",
     "never_infer_success": true
   },
-  "secrets_policy": "financial details remain private"
+  "secrets_policy": "financial details remain private",
+  "output_format": {
+    "delivery": "Telegram Markdown",
+    "template": "output.md",
+    "exact_contract": true,
+    "always_reports": true
+  },
+  "limitations": [
+    "This is a current-session report, not a multi-day performance scorecard.",
+    "The private brokerage client, account labels, snapshot code, and live portfolio values are not included.",
+    "Dollar P&L and account reconciliation must come from live reads, not model arithmetic or memory."
+  ],
+  "copying": {
+    "ready_to_run": false,
+    "requires": [
+      "a live all-account brokerage data source",
+      "a snapshot writer",
+      "a delivery target",
+      "a model/tool runner if keeping agent mode"
+    ]
+  }
 }

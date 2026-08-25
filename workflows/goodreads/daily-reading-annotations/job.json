@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "goodreads.daily-reading-annotations",
   "title": "Goodreads daily reading + annotations",
   "domain": "goodreads",
@@ -9,8 +9,17 @@
     "timezone": "America/Los_Angeles"
   },
   "runtime": {
+    "scheduler": "Hermes Agent cron (optional wrapper)",
+    "execution_mode": "script/no-agent",
     "kind": "script",
-    "uses_llm": false
+    "uses_llm": false,
+    "model_attached": false,
+    "model": null,
+    "portable_to": [
+      "Hermes Agent cron in no-agent mode",
+      "Windows Task Scheduler",
+      "system cron or launchd after adapting local paths"
+    ]
   },
   "inputs": [
     "authenticated currently-reading shelf",
@@ -45,5 +54,25 @@
     "mode": "partial-fail-loud",
     "never_infer_success": true
   },
-  "secrets_policy": "session cookies and CSRF remain local; public output is counts/titles only"
+  "secrets_policy": "session cookies and CSRF remain local; public output is counts/titles only",
+  "output_format": {
+    "delivery": "Telegram Markdown",
+    "template": "output.md",
+    "exact_contract": true,
+    "always_reports": true
+  },
+  "limitations": [
+    "The actual collector script and account session are private, so this is a contract and output template, not a one-command install.",
+    "Kindle highlights can take time to appear in Goodreads; no Goodreads-visible change is not proof that no highlight was made.",
+    "Publicizing annotations is an account write and only makes sense with explicit standing approval."
+  ],
+  "copying": {
+    "ready_to_run": false,
+    "requires": [
+      "a Goodreads session cookie stored outside the repo",
+      "the private collector script or your own replacement",
+      "a local state directory with atomic writes",
+      "an explicit decision on annotation publicizing"
+    ]
+  }
 }

@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -27,6 +28,28 @@ class ValidationTests(unittest.TestCase):
             )
             issues = VALIDATOR.validate(root)
             self.assertTrue(any("forbidden live job id" in issue for issue in issues))
+
+    def test_every_job_declares_model_and_output_contract(self):
+        for path in ROOT.glob("workflows/**/job.json"):
+            data = json.loads(path.read_text(encoding="utf-8"))
+            runtime = data["runtime"]
+            self.assertEqual(runtime["model_attached"], runtime["uses_llm"])
+            if runtime["model_attached"]:
+                self.assertIsInstance(runtime["model"], dict)
+                self.assertTrue(runtime["model"]["fallbacks"])
+            else:
+                self.assertIsNone(runtime["model"])
+            self.assertTrue((path.parent / data["output_format"]["template"]).is_file())
+            self.assertFalse(data["copying"]["ready_to_run"])
+            self.assertTrue(data["limitations"])
+
+    def test_repo_brand_and_license_are_current(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+        self.assertIn("# automations and crons", readme)
+        self.assertNotIn("hermes cron playbooks", readme)
+        self.assertNotIn("san" + "itized", readme)
+        self.assertNotIn("ver" + "ifiable", readme)
+        self.assertFalse((ROOT / "LICENSE").exists())
 
 
 if __name__ == "__main__":

@@ -1,72 +1,72 @@
-# Hermes Cron Playbooks
+# Automations and Crons
 
-A public, sanitized look at how a small personal-operations stack uses [Hermes Agent](https://hermes-agent.nousresearch.com/docs) cron jobs for books, brokerage reporting, backup safety, and monitoring.
+I'm uploading the cron jobs and automations I actually use as a checkpoint and for transparency. Some are plain scripts. Some run through Hermes with no agent. Some spin up an agent and a model because the output needs judgment instead of a fixed template.
 
-This repository publishes the **operating contracts**, not a raw scheduler database. It contains no live job IDs, chat IDs, account identifiers, machine paths, cookies, tokens, portfolio values, or private prompts.
+This is not a starter kit or a one-click install. It is the shape of the jobs, the schedules, the runtime choices, the output contracts, and the parts that still depend on private code or local setup.
 
-## Why this exists
+Obviously I removed keys, account IDs, chat IDs, machine paths, balances, and raw private output.
 
-A useful cron is more than a schedule. Every workflow here declares:
+## What's here
 
-- what wakes it up;
-- which source is authoritative;
-- whether it reads or mutates state;
-- exactly how success is verified;
-- what receipt is retained and delivered;
-- how it fails loudly without inventing success.
+| Automation | Cadence | Scheduler/runtime | Model attached? | Output |
+|---|---:|---|---|---|
+| [Goodreads reading + annotations](workflows/goodreads/daily-reading-annotations/) | daily | script / no-agent; Hermes wrapper optional | no | [exact Telegram format](workflows/goodreads/daily-reading-annotations/output.md) |
+| [Robinhood token refresh](workflows/robinhood/token-refresh/) | every few days | Hermes agent | Luna Max + inherited fallbacks | [exact four-line receipt](workflows/robinhood/token-refresh/output.md) |
+| [Robinhood premarket brief](workflows/robinhood/premarket-brief/) | weekdays | Hermes agent | Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/premarket-brief/output.md) |
+| [Robinhood midday snapshot](workflows/robinhood/midday-snapshot/) | weekdays | Hermes agent | Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/midday-snapshot/output.md) |
+| [Robinhood postmarket summary](workflows/robinhood/postmarket-summary/) | weekdays | Hermes agent | Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/postmarket-summary/output.md) |
+| [Obsidian parity-first sync](workflows/obsidian/parity-first-sync/) | paused | script / no-agent | no | [paused output contract](workflows/obsidian/parity-first-sync/output.md) |
+| [Cron roster guard](workflows/monitoring/roster-guard/) | every five minutes | script / no-agent | no | [transition alerts](workflows/monitoring/roster-guard/output.md) |
 
-## Workflow map
+[`matrix.csv`](matrix.csv) is the quick machine-readable view.
 
-| Domain | Workflow | Cadence | Runtime | Risk |
-|---|---|---:|---|---|
-| Goodreads | [daily reading + annotations](workflows/goodreads/daily-reading-annotations/) | daily | deterministic script | account write, narrowly scoped |
-| Robinhood | [token refresh](workflows/robinhood/token-refresh/) | every few days | agent | auth state only |
-| Robinhood | [premarket brief](workflows/robinhood/premarket-brief/) | weekdays | agent | read-only |
-| Robinhood | [midday snapshot](workflows/robinhood/midday-snapshot/) | weekdays | agent | read-only |
-| Robinhood | [postmarket summary](workflows/robinhood/postmarket-summary/) | weekdays | agent | read-only |
-| Obsidian | [parity-first sync](workflows/obsidian/parity-first-sync/) | paused by default | deterministic script | filesystem write |
-| Monitoring | [roster guard](workflows/monitoring/roster-guard/) | every five minutes | deterministic script | monitoring write |
+## The runtime labels actually mean something
 
-The machine-readable cross-workflow view is [`matrix.csv`](matrix.csv).
+Every `job.json` says:
 
-## Structure
+- what scheduler currently runs it;
+- whether it is a plain script, a no-agent job, or a model-backed agent job;
+- whether a model is attached;
+- the provider, model, reasoning level, and inherited fallback chain when there is one;
+- what other schedulers could run it after adapting the private dependencies;
+- the exact output template;
+- why copying the folder is not enough.
+
+Hermes is one runner used here, not the identity of the repo. The script jobs can run under Task Scheduler, system cron, launchd, or another runner once paths and local dependencies are adapted. The agent jobs need Hermes or another tool-capable agent runner.
+
+## Copying one of these
+
+Copying a folder does **not** make the automation work.
+
+1. Read `job.json`, especially `runtime`, `copying`, and `limitations`.
+2. Read `output.md`; it is part of the contract, not decoration.
+3. Replace the private client/script/session/storage pieces with your own.
+4. Decide whether you actually need a model. If the output is deterministic, use a script.
+5. Create the schedule in whatever runner you use.
+6. Run it manually and verify the real source or state change. Scheduler `ok` is not proof.
+7. Add a heartbeat if the normal path can be silent.
+
+The brokerage folders are not trading software. The Goodreads folder does not include a session or the private collector. The Obsidian folder should remain paused until independent trees have backups and a reviewed merge plan.
+
+## Layout
 
 ```text
-workflows/<domain>/<workflow>/
-  job.json      public operating contract
-  prompt.md     sanitized prompt/script behavior where useful
+workflows/<domain>/<automation>/
+  job.json      schedule, runtime/model, dependencies, checks, limitations
+  prompt.md     what the agent/script is supposed to do when useful
+  output.md     exact output format or the honest current boundary
 schema/job.schema.json
 scripts/validate.py
 matrix.csv
 ```
 
-## Safety boundary
-
-Do **not** export `jobs.json` into this repository. Real scheduler state commonly contains stable IDs, delivery targets, local paths, account context, and operational instructions that should remain private.
-
-The validator rejects common leaks and requires every mutating workflow to declare an approval boundary and read-back verification.
+## Checks
 
 ```bash
 python scripts/validate.py
 python -m unittest discover -s tests -v
 ```
 
-## Copying a playbook
+## Reuse
 
-1. Copy one workflow folder.
-2. Replace every placeholder locally.
-3. Create the cron with `hermes cron create` or the Hermes UI.
-4. Run it manually once.
-5. Verify the real source and retained receipt—not merely scheduler status `ok`.
-6. Add an overdue/semantic monitor appropriate to the schedule.
-
-## Honest limitations
-
-- These are patterns from one real homelab, not universal defaults.
-- Brokerage jobs are reporting examples, not investment advice.
-- The Goodreads workflow intentionally publishes only annotations that the account owner pre-authorized for public visibility.
-- The Obsidian workflow is paused until independent trees have been backed up and proven equivalent. Sync tools are not merge proofs.
-
-## License
-
-MIT. See [LICENSE](LICENSE).
+There is no open-source license attached to this repository. The code and writing remain all rights reserved. Reading it or borrowing the general ideas is fine; do not assume permission to redistribute substantial copies of the repository.
