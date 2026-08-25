@@ -11,10 +11,10 @@ Obviously I removed keys, account IDs, chat IDs, machine paths, balances, and ra
 | Automation | Cadence | Scheduler/runtime | Model attached? | Output |
 |---|---:|---|---|---|
 | [Goodreads reading + annotations](workflows/goodreads/daily-reading-annotations/) | daily | script / no-agent; Hermes wrapper optional | no | [exact Telegram format](workflows/goodreads/daily-reading-annotations/output.md) |
-| [Robinhood token refresh](workflows/robinhood/token-refresh/) | every few days | Hermes agent | Luna Max + inherited fallbacks | [exact four-line receipt](workflows/robinhood/token-refresh/output.md) |
-| [Robinhood premarket brief](workflows/robinhood/premarket-brief/) | weekdays | Hermes agent | Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/premarket-brief/output.md) |
-| [Robinhood midday snapshot](workflows/robinhood/midday-snapshot/) | weekdays | Hermes agent | Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/midday-snapshot/output.md) |
-| [Robinhood postmarket summary](workflows/robinhood/postmarket-summary/) | weekdays | Hermes agent | Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/postmarket-summary/output.md) |
+| [Robinhood token refresh](workflows/robinhood/token-refresh/) | every few days | Hermes agent | yes — Luna Max + inherited fallbacks | [exact four-line receipt](workflows/robinhood/token-refresh/output.md) |
+| [Robinhood premarket brief](workflows/robinhood/premarket-brief/) | weekdays | Hermes agent | yes — Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/premarket-brief/output.md) |
+| [Robinhood midday snapshot](workflows/robinhood/midday-snapshot/) | weekdays | Hermes agent | yes — Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/midday-snapshot/output.md) |
+| [Robinhood postmarket summary](workflows/robinhood/postmarket-summary/) | weekdays | Hermes agent | yes — Luna Max + inherited fallbacks | [exact report template](workflows/robinhood/postmarket-summary/output.md) |
 | [Obsidian parity-first sync](workflows/obsidian/parity-first-sync/) | paused | script / no-agent | no | [paused output contract](workflows/obsidian/parity-first-sync/output.md) |
 | [Cron roster guard](workflows/monitoring/roster-guard/) | every five minutes | script / no-agent | no | [transition alerts](workflows/monitoring/roster-guard/output.md) |
 

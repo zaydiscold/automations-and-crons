@@ -58,10 +58,26 @@ def validate_spec(path: Path, data: dict) -> list[str]:
         issues.append(f"{path}: cron must have five fields")
     if (data.get("schedule") or {}).get("timezone") != "America/Los_Angeles":
         issues.append(f"{path}: timezone must be explicit")
-    if not data.get("verification"):
-        issues.append(f"{path}: verification is empty")
+    for key in ("inputs", "outputs", "verification"):
+        values = data.get(key)
+        if not isinstance(values, list) or not values or not all(
+            isinstance(item, str) and item.strip() for item in values
+        ):
+            issues.append(f"{path}: {key} must be a nonempty list of nonempty strings")
 
     runtime = data.get("runtime") or {}
+    for key in ("scheduler", "execution_mode", "kind"):
+        if not isinstance(runtime.get(key), str) or not runtime[key].strip():
+            issues.append(f"{path}: runtime.{key} must be a nonempty string")
+    if runtime.get("execution_mode") not in {"agent", "script/no-agent"}:
+        issues.append(f"{path}: runtime.execution_mode is invalid")
+    if runtime.get("kind") not in {"agent", "script"}:
+        issues.append(f"{path}: runtime.kind is invalid")
+    portable_to = runtime.get("portable_to")
+    if not isinstance(portable_to, list) or not portable_to or not all(
+        isinstance(item, str) and item.strip() for item in portable_to
+    ):
+        issues.append(f"{path}: runtime.portable_to must contain nonempty strings")
     uses_llm = runtime.get("uses_llm")
     attached = runtime.get("model_attached")
     model = runtime.get("model")
@@ -73,8 +89,21 @@ def validate_spec(path: Path, data: dict) -> list[str]:
             absent = sorted(required_model - set(model))
             if absent:
                 issues.append(f"{path}: model metadata missing {absent}")
-            if not model.get("fallbacks"):
+            for key in ("provider", "name", "reasoning", "fallback_policy"):
+                if not isinstance(model.get(key), str) or not model[key].strip():
+                    issues.append(f"{path}: model.{key} must be a nonempty string")
+            fallbacks = model.get("fallbacks")
+            if not isinstance(fallbacks, list) or not fallbacks:
                 issues.append(f"{path}: model-backed runtime lacks fallbacks")
+            elif not all(
+                isinstance(item, dict)
+                and isinstance(item.get("provider"), str)
+                and item["provider"].strip()
+                and isinstance(item.get("model"), str)
+                and item["model"].strip()
+                for item in fallbacks
+            ):
+                issues.append(f"{path}: every fallback needs nonempty provider/model strings")
     elif uses_llm is False:
         if attached is not False or model is not None:
             issues.append(f"{path}: no-agent runtime must declare model_attached=false and model=null")
@@ -82,17 +111,32 @@ def validate_spec(path: Path, data: dict) -> list[str]:
         issues.append(f"{path}: runtime.uses_llm must be boolean")
 
     output_format = data.get("output_format") or {}
+    if not isinstance(output_format.get("delivery"), str) or not output_format["delivery"].strip():
+        issues.append(f"{path}: output_format.delivery must be a nonempty string")
     template = output_format.get("template")
     if not template or not (path.parent / template).is_file():
         issues.append(f"{path}: output template is missing")
     if output_format.get("exact_contract") is not True:
         issues.append(f"{path}: output format must declare exact_contract=true")
+    expected_always_reports = (data.get("failure_policy") or {}).get("deliver_every_run") is True
+    if output_format.get("always_reports") != expected_always_reports:
+        issues.append(f"{path}: output_format.always_reports disagrees with failure policy")
 
     copying = data.get("copying") or {}
-    if copying.get("ready_to_run") is not False or not copying.get("requires"):
+    requires = copying.get("requires")
+    if copying.get("ready_to_run") is not False or not requires:
         issues.append(f"{path}: copying limitations must say ready_to_run=false and list requirements")
-    if not data.get("limitations"):
+    if not isinstance(requires, list) or not all(
+        isinstance(item, str) and item.strip() for item in requires
+    ):
+        issues.append(f"{path}: copying.requires must contain nonempty strings")
+    limitations = data.get("limitations")
+    if not limitations:
         issues.append(f"{path}: limitations are empty")
+    elif not isinstance(limitations, list) or not all(
+        isinstance(item, str) and item.strip() for item in limitations
+    ):
+        issues.append(f"{path}: limitations must contain nonempty strings")
 
     risk = data.get("risk") or {}
     if risk.get("level") in RISKY and not risk.get("confirmation"):
