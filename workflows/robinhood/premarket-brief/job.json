@@ -5,7 +5,7 @@
   "domain": "robinhood",
   "enabled": true,
   "schedule": {
-    "cron": "0 6 * * 1-5",
+    "cron": "30 5 * * 1-5",
     "timezone": "America/Los_Angeles"
   },
   "runtime": {
