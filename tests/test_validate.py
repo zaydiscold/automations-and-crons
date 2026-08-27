@@ -66,6 +66,31 @@ class ValidationTests(unittest.TestCase):
         self.assertTrue(any("copying.requires" in issue for issue in issues))
         self.assertTrue(any("limitations must contain" in issue for issue in issues))
 
+    def test_market_templates_are_session_grounded(self):
+        premarket_job = json.loads(
+            (ROOT / "workflows/robinhood/premarket-brief/job.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(premarket_job["schedule"]["cron"], "30 5 * * 1-5")
+
+        premarket = (
+            ROOT / "workflows/robinhood/premarket-brief/output.md"
+        ).read_text(encoding="utf-8")
+        midday = (
+            ROOT / "workflows/robinhood/midday-snapshot/output.md"
+        ).read_text(encoding="utf-8")
+        postmarket = (
+            ROOT / "workflows/robinhood/postmarket-summary/output.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("Ext-hours vs prior close", premarket)
+        self.assertIn("afterHoursChangeUsd", premarket)
+        self.assertIn("not an isolated overnight session", premarket)
+        self.assertIn("biggest regular-session drivers", midday)
+        self.assertIn("Top regular-session $ movers", postmarket)
+        for rendered in (premarket, midday, postmarket):
+            self.assertNotIn("| Why |", rendered)
+            self.assertIn("mandatory explanation column", rendered)
+
 
 if __name__ == "__main__":
     unittest.main()
