@@ -1,21 +1,32 @@
 # Output format
 
-This one is deterministic. No model is attached and the script prints the final Telegram Markdown itself.
+Deterministic script output; no model rewrites it.
+
+## No new content
 
 ```text
 📚 **Goodreads · Mon Aug 24, 4:01 AM PT**
 
-**Reading now — N**
-• <every current title, one per line, verbatim>
+**Currently reading — N**
+• <every current title, one per line>
 
-**Annotations**
-• <exact new Goodreads-visible highlight/note delta, or an explicit no-visible-change statement>
-• Publish sweep: N/N books accepted + verified
-• ⚠️ <sync-pending warning only when a user-reported action remains absent after the sweep>
-
-**Review comments — separate from Kindle highlights**
-• N current · <+N new review comments | no new review comments>
+• Highlights/notes: 0
+• Published: yes — N/N books
 🌸
 ```
 
-Never translate “not visible in Goodreads” into “the user made zero highlights.”
+## Highlights and/or notes found
+
+```text
+📚 **Goodreads · Mon Aug 24, 4:01 AM PT**
+
+**Currently reading — N**
+• <every current title, one per line>
+
+• Highlights: Book A +N · Book B +N
+• Notes: Book A +N · Book C +N
+• Published: yes — N/N books
+🌸
+```
+
+If either highlights or notes has activity, always split them into two lines and show `0` for the inactive type. “Notes” means written text attached to a highlight. Goodreads social comments are a separate feature and are excluded.
