@@ -9,11 +9,12 @@ This one is deterministic. No model is attached and the script prints the final 
 • <every current title, one per line, verbatim>
 
 **Annotations**
-• <new Goodreads-visible changes, or an explicit no-visible-change statement>
-• ⚠️ <sync-pending warning when the user reports a highlight Goodreads has not surfaced>
+• <exact new Goodreads-visible highlight/note delta, or an explicit no-visible-change statement>
+• Publish sweep: N/N books accepted + verified
+• ⚠️ <sync-pending warning only when a user-reported action remains absent after the sweep>
 
-**Comments**
-• N current · +N new
+**Review comments — separate from Kindle highlights**
+• N current · <+N new review comments | no new review comments>
 🌸
 ```
 

@@ -23,23 +23,24 @@
   },
   "inputs": [
     "authenticated currently-reading shelf",
-    "annotated-book detail metadata",
+    "annotated-book discovery and post-write detail metadata",
     "authenticated recent-comments metadata",
     "prior hashed/count state"
   ],
   "outputs": [
     "every current title",
-    "new highlight/note counts",
-    "publicization receipt",
+    "exact new highlight/note counts",
+    "idempotent publish-all sweep receipt",
     "comments count/delta without bodies"
   ],
   "risk": {
     "level": "account-write",
-    "confirmation": "standing approval limited to making newly detected private annotations visible"
+    "confirmation": "standing approval limited to idempotently making every discovered annotated book visible before post-write diff/verification"
   },
   "verification": [
     "shelf parsed count equals declared count and every title is non-null",
-    "every annotated book detail is inspected",
+    "every discovered annotated book receives the idempotent visible=true write before detail diffing",
+    "every annotated book detail is inspected after the write",
     "post-write visible count equals annotation count",
     "comment output contains no body fields",
     "state updates are atomic"
@@ -64,6 +65,7 @@
   "limitations": [
     "The actual collector script and account session are private, so this is a contract and output template, not a one-command install.",
     "Kindle highlights can take time to appear in Goodreads; no Goodreads-visible change is not proof that no highlight was made.",
+    "Do not suppress the idempotent visible=true sweep from pre-write count equality; Goodreads can expose additional imported/private rows only after the write.",
     "Publicizing annotations is an account write and only makes sense with explicit standing approval."
   ],
   "copying": {
