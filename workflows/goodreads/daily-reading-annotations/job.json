@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "id": "goodreads.daily-reading-annotations",
-  "title": "Goodreads daily reading + annotations",
+  "title": "Goodreads daily reading + highlights",
   "domain": "goodreads",
   "enabled": true,
   "schedule": {
@@ -24,15 +24,19 @@
   "inputs": [
     "authenticated currently-reading shelf",
     "annotated-book discovery and post-write detail metadata",
-    "authenticated recent-comments metadata",
-    "prior hashed/count state"
+    "prior annotation count/identity state"
   ],
   "outputs": [
-    "every current title",
-    "exact new highlight/note counts",
-    "idempotent publish-all sweep receipt",
-    "comments count/delta without bodies"
+    "every current title as a bullet",
+    "exact per-book new highlight counts",
+    "exact per-book new attached-note counts",
+    "idempotent publish-all verification receipt"
   ],
+  "content_types": {
+    "highlights": "selected passages",
+    "notes": "written text attached to a highlight",
+    "social_comments": "separate Goodreads social feature; excluded from this job"
+  },
   "risk": {
     "level": "account-write",
     "confirmation": "standing approval limited to idempotently making every discovered annotated book visible before post-write diff/verification"
@@ -42,7 +46,6 @@
     "every discovered annotated book receives the idempotent visible=true write before detail diffing",
     "every annotated book detail is inspected after the write",
     "post-write visible count equals annotation count",
-    "comment output contains no body fields",
     "state updates are atomic"
   ],
   "logging": {
@@ -60,13 +63,15 @@
     "delivery": "Telegram Markdown",
     "template": "output.md",
     "exact_contract": true,
-    "always_reports": true
+    "always_reports": true,
+    "zero_rule": "one line: Highlights/notes: 0",
+    "activity_rule": "split Highlights and Notes into separate lines; list affected books and exact counts"
   },
   "limitations": [
     "The actual collector script and account session are private, so this is a contract and output template, not a one-command install.",
-    "Kindle highlights can take time to appear in Goodreads; no Goodreads-visible change is not proof that no highlight was made.",
-    "Do not suppress the idempotent visible=true sweep from pre-write count equality; Goodreads can expose additional imported/private rows only after the write.",
-    "Publicizing annotations is an account write and only makes sense with explicit standing approval."
+    "Goodreads can expose additional imported/private rows only after the idempotent visible=true write; never suppress the sweep from pre-write count equality.",
+    "Social comments are not attached notes and are intentionally excluded.",
+    "Publicizing highlights and attached notes is an account write and requires explicit standing approval."
   ],
   "copying": {
     "ready_to_run": false,
@@ -74,7 +79,7 @@
       "a Goodreads session cookie stored outside the repo",
       "the private collector script or your own replacement",
       "a local state directory with atomic writes",
-      "an explicit decision on annotation publicizing"
+      "an explicit decision on highlight/note publicizing"
     ]
   }
 }
